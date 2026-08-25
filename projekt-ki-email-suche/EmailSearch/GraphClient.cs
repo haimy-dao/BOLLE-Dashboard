@@ -28,20 +28,26 @@ public static class GraphClient
         }
     }
 
+    private static readonly StoreName[] StoresToSearch = { StoreName.My, StoreName.Root };
+
     private static X509Certificate2 FindCertificateByThumbprint(string thumbprint)
     {
         foreach (var location in new[] { StoreLocation.CurrentUser, StoreLocation.LocalMachine })
         {
-            using var store = new X509Store(StoreName.My, location);
-            store.Open(OpenFlags.ReadOnly);
-            var matches = store.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, validOnly: false);
-            if (matches.Count > 0)
+            foreach (var storeName in StoresToSearch)
             {
-                return matches[0];
+                using var store = new X509Store(storeName, location);
+                store.Open(OpenFlags.ReadOnly);
+                var matches = store.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, validOnly: false);
+                if (matches.Count > 0)
+                {
+                    return matches[0];
+                }
             }
         }
 
         throw new InvalidOperationException(
-            $"Zertifikat mit Thumbprint '{thumbprint}' wurde weder unter CurrentUser\\My noch LocalMachine\\My gefunden.");
+            $"Zertifikat mit Thumbprint '{thumbprint}' wurde in keinem der durchsuchten Speicher " +
+            "(My, Root; CurrentUser, LocalMachine) gefunden.");
     }
 }

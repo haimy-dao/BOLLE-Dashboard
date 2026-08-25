@@ -321,7 +321,7 @@ headers = {"Authorization": f"Bearer {token['access_token']}"}
 search_url = "https://graph.microsoft.com/v1.0/users/<USER_ID>/messages"
 params = {
     "$search": '"12774"',    # Suche in Betreff + Body
-    "$top": 50,
+    "$top": 10,
     "$select": "id,subject,from,receivedDateTime,bodyPreview,hasAttachments"
 }
 response = requests.get(search_url, headers=headers, params=params)

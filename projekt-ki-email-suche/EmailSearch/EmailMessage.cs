@@ -4,6 +4,9 @@ namespace EmailSearch;
 
 public class EmailMessage
 {
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = string.Empty;
+
     [JsonPropertyName("subject")]
     public string? Subject { get; set; }
 

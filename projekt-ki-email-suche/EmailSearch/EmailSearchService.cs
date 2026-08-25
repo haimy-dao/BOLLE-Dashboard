@@ -12,17 +12,22 @@ public static class EmailSearchService
     {
         var url = $"{GraphBase}/users/{Uri.EscapeDataString(mailbox)}/messages" +
                   $"?$search=\"{Uri.EscapeDataString(searchTerm)}\"" +
-                  "&$top=50" +
-                  "&$select=subject,from,receivedDateTime,hasAttachments,webLink";
+                  "&$top=10" +
+                  "&$select=id,subject,from,receivedDateTime,hasAttachments,webLink";
 
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
         request.Headers.Add("ConsistencyLevel", "eventual");
 
         var response = await client.SendAsync(request);
-        response.EnsureSuccessStatusCode();
-
         var json = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new InvalidOperationException(
+                $"Graph-API-Anfrage fehlgeschlagen ({(int)response.StatusCode} {response.StatusCode}): {json}");
+        }
+
         var result = JsonSerializer.Deserialize<MessageSearchResponse>(
             json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         return result?.Value ?? new List<EmailMessage>();

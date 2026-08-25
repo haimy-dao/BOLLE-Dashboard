@@ -19,8 +19,19 @@ foreach (var msg in messages)
 {
     var sender = msg.From?.EmailAddress?.Address ?? "?";
     Console.WriteLine($"- {msg.ReceivedDateTime} | von {sender} | {msg.Subject}");
-    if (msg.HasAttachments)
+
+    if (!msg.HasAttachments)
     {
-        Console.WriteLine("    -> hat Anhänge (Inhalt wird noch nicht ausgelesen, Schritt 2)");
+        continue;
+    }
+
+    var attachments = await AttachmentClient.GetAttachmentsAsync(httpClient, accessToken, Config.TargetMailbox, msg.Id);
+    foreach (var attachment in attachments.Where(a => a.IsFileAttachment && a.ContentBytes is not null))
+    {
+        var bytes = Convert.FromBase64String(attachment.ContentBytes!);
+        var text = TextExtractor.ExtractText(attachment.Name, bytes);
+        var found = text.Contains(Config.SearchTerm, StringComparison.OrdinalIgnoreCase);
+        var marker = found ? $"enthält '{Config.SearchTerm}'" : "kein Treffer im Text (evtl. gescannt/Bild ohne OCR)";
+        Console.WriteLine($"    -> Anhang '{attachment.Name}': {marker}");
     }
 }
