@@ -29,9 +29,15 @@ foreach (var msg in messages)
     foreach (var attachment in attachments.Where(a => a.IsFileAttachment && a.ContentBytes is not null))
     {
         var bytes = Convert.FromBase64String(attachment.ContentBytes!);
-        var text = TextExtractor.ExtractText(attachment.Name, bytes);
-        var found = text.Contains(Config.SearchTerm, StringComparison.OrdinalIgnoreCase);
-        var marker = found ? $"enthält '{Config.SearchTerm}'" : "kein Treffer im Text (evtl. gescannt/Bild ohne OCR)";
+        var result = TextExtractor.ExtractText(attachment.Name, bytes);
+        var marker = result.Status switch
+        {
+            ExtractionStatus.Unsupported => "Dateiformat wird noch nicht unterstützt (z. B. Bild ohne OCR)",
+            ExtractionStatus.Failed => $"Extraktion fehlgeschlagen: {result.Text}",
+            _ => result.Text.Contains(Config.SearchTerm, StringComparison.OrdinalIgnoreCase)
+                ? $"enthält '{Config.SearchTerm}'"
+                : "kein Treffer im extrahierten Text",
+        };
         Console.WriteLine($"    -> Anhang '{attachment.Name}': {marker}");
     }
 }

@@ -5,24 +5,36 @@ using UglyToad.PdfPig;
 
 namespace EmailSearch;
 
+public enum ExtractionStatus
+{
+    Ok,
+    Unsupported,
+    Failed,
+}
+
+public record ExtractionResult(ExtractionStatus Status, string Text);
+
 public static class TextExtractor
 {
-    public static string ExtractText(string fileName, byte[] content)
+    private static readonly HashSet<string> PlainTextExtensions = new() { ".xml", ".txt", ".csv", ".json", ".html", ".htm" };
+
+    public static ExtractionResult ExtractText(string fileName, byte[] content)
     {
         var extension = Path.GetExtension(fileName).ToLowerInvariant();
         try
         {
             return extension switch
             {
-                ".pdf" => ExtractPdf(content),
-                ".docx" => ExtractDocx(content),
-                ".xlsx" => ExtractXlsx(content),
-                _ => string.Empty,
+                ".pdf" => new ExtractionResult(ExtractionStatus.Ok, ExtractPdf(content)),
+                ".docx" => new ExtractionResult(ExtractionStatus.Ok, ExtractDocx(content)),
+                ".xlsx" => new ExtractionResult(ExtractionStatus.Ok, ExtractXlsx(content)),
+                _ when PlainTextExtensions.Contains(extension) => new ExtractionResult(ExtractionStatus.Ok, Encoding.UTF8.GetString(content)),
+                _ => new ExtractionResult(ExtractionStatus.Unsupported, string.Empty),
             };
         }
         catch (Exception ex)
         {
-            return $"[Extraktion fehlgeschlagen: {ex.Message}]";
+            return new ExtractionResult(ExtractionStatus.Failed, ex.Message);
         }
     }
 
