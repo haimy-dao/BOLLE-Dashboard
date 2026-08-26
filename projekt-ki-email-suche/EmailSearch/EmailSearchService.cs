@@ -13,7 +13,7 @@ public static class EmailSearchService
         var url = $"{GraphBase}/users/{Uri.EscapeDataString(mailbox)}/messages" +
                   $"?$search=\"{Uri.EscapeDataString(searchTerm)}\"" +
                   "&$top=10" +
-                  "&$select=id,subject,from,receivedDateTime,hasAttachments,webLink";
+                  "&$select=id,subject,bodyPreview,from,receivedDateTime,hasAttachments,webLink,conversationId";
 
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);

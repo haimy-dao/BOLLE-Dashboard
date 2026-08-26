@@ -2,3 +2,4 @@
 *.secret
 bin/
 obj/
+EmailSearch/Models/

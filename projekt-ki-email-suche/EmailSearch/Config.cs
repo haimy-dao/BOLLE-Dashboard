@@ -7,6 +7,7 @@ public static class Config
     public static string AzureCertThumbprint { get; }
     public static string TargetMailbox { get; }
     public static string SearchTerm { get; }
+    public static string SemanticQuery { get; }
 
     static Config()
     {
@@ -17,6 +18,7 @@ public static class Config
         AzureCertThumbprint = Require("AZURE_CERT_THUMBPRINT");
         TargetMailbox = Require("TARGET_MAILBOX");
         SearchTerm = Environment.GetEnvironmentVariable("SEARCH_TERM") ?? "12774";
+        SemanticQuery = Environment.GetEnvironmentVariable("SEMANTIC_QUERY") ?? $"Projekt {SearchTerm}";
     }
 
     private static string Require(string name)

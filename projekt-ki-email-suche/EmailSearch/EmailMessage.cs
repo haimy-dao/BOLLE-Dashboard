@@ -10,8 +10,14 @@ public class EmailMessage
     [JsonPropertyName("subject")]
     public string? Subject { get; set; }
 
+    [JsonPropertyName("bodyPreview")]
+    public string? BodyPreview { get; set; }
+
     [JsonPropertyName("receivedDateTime")]
-    public string? ReceivedDateTime { get; set; }
+    public DateTimeOffset ReceivedDateTime { get; set; }
+
+    [JsonPropertyName("conversationId")]
+    public string ConversationId { get; set; } = string.Empty;
 
     [JsonPropertyName("hasAttachments")]
     public bool HasAttachments { get; set; }
